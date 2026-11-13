@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="AutoService.Core/AutoService.Core.csproj" Id="3d22aa48-e29e-4f0b-8548-36d1594bcc5f" />
   <Project Path="AutoService/AutoService.csproj" Id="83da74fe-9714-48d6-9e25-9f794bf81754" />
 </Solution>
