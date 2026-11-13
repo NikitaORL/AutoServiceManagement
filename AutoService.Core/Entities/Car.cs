@@ -16,5 +16,7 @@ namespace AutoService.Core.Entities
         public int CustomerId { get; set; }
 
         public Customer Customer { get; set; } = null!;
+        public List<RepairOrder> RepairOrders { get; set; } = new();
+
     }
 }
