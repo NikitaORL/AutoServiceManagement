@@ -1,4 +1,4 @@
-﻿
+
 namespace AutoService.Core.Entities
 {
     public class RepairOrder
@@ -16,5 +16,9 @@ namespace AutoService.Core.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? CompletedAt { get; set; }
+
+        public List<RepairOrderPart> Parts { get; set; } = new();
+
+        public List<WorkLog> WorkLogs { get; set; } = new();
     }
 }
