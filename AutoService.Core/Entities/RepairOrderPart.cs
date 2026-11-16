@@ -16,5 +16,7 @@ namespace AutoService.Core.Entities
         public decimal UnitPrice { get; set; }
 
         public List<RepairOrderPart> Parts { get; set; } = new();
+
+        public List<WorkLog> WorkLogs { get; set; } = new();
     }
 }
