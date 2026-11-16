@@ -14,5 +14,6 @@ namespace AutoService.Core.Entities
         public int StockQuantity { get; set; }
 
         public string Description { get; set; } = string.Empty;
+        public List<RepairOrderPart> RepairOrderParts { get; set; } = new();
     }
 }
