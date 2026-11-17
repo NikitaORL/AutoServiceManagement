@@ -1,4 +1,5 @@
 using AutoService.Infrastructure.Data;
+using AutoService.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using AutoService.Core.Interfaces;
 using AutoService.Infrastructure.Repositories;
@@ -9,6 +10,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
 
 
 // Add services to the container.
