@@ -38,6 +38,38 @@ namespace AutoService.Infrastructure.Data
             modelBuilder.Entity<WorkLog>()
                 .Property(w => w.HoursWorked)
                 .HasPrecision(9, 2);
+
+            ////////////////////////////////////
+            modelBuilder.Entity<Part>().HasData(
+                new Part
+                {
+                    Id = 1,
+                    Name = "Oil Filter",
+                    PartNumber = "OIL-001",
+                    Price = 12.50m,
+                    StockQuantity = 15,
+                    Description = "Engine oil filter"
+                },
+                new Part
+                {
+                    Id = 2,
+                    Name = "Brake Pads",
+                    PartNumber = "BRK-001",
+                    Price = 45.00m,
+                    StockQuantity = 8,
+                    Description = "Front brake pads"
+                },
+                new Part
+                {
+                    Id = 3,
+                    Name = "Engine Oil 1L",
+                    PartNumber = "ENG-001",
+                    Price = 14.00m,
+                    StockQuantity = 30,
+                    Description = "Synthetic engine oil"
+                }
+            );
+
         }
 
     }

@@ -114,6 +114,35 @@ namespace AutoService.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Parts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Engine oil filter",
+                            Name = "Oil Filter",
+                            PartNumber = "OIL-001",
+                            Price = 12.50m,
+                            StockQuantity = 15
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Front brake pads",
+                            Name = "Brake Pads",
+                            PartNumber = "BRK-001",
+                            Price = 45.00m,
+                            StockQuantity = 8
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Synthetic engine oil",
+                            Name = "Engine Oil 1L",
+                            PartNumber = "ENG-001",
+                            Price = 14.00m,
+                            StockQuantity = 30
+                        });
                 });
 
             modelBuilder.Entity("AutoService.Core.Entities.RepairOrder", b =>
