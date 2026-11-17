@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AutoService.Core\AutoService.Core.csproj" />
+    <ProjectReference Include="..\AutoService.Infrastructure\AutoService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
