@@ -23,15 +23,32 @@ namespace AutoService.Core.Services
             return await _repository.GetByIdAsync(id);
         }
 
-        public Task<Customer> CreateAsync(Customer customer)
+
+
+
+        public async Task<bool> UpdateAsync(int id, Customer customer)
         {
-            throw new NotImplementedException();
+            var existingCustomer = await _repository.GetByIdAsync(id);
+
+            if (existingCustomer == null)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(customer.FirstName))
+                throw new ArgumentException("First name is required");
+
+            if (string.IsNullOrWhiteSpace(customer.LastName))
+                throw new ArgumentException("Last name is required");
+
+            existingCustomer.FirstName = customer.FirstName;
+            existingCustomer.LastName = customer.LastName;
+            existingCustomer.Email = customer.Email;
+            existingCustomer.PhoneNumber = customer.PhoneNumber;
+
+            await _repository.UpdateAsync(existingCustomer);
+
+            return true;
         }
 
-        public Task<bool> UpdateAsync(int id, Customer customer)
-        {
-            throw new NotImplementedException();
-        }
 
 
         public async Task<Customer> CreateAsync(Customer customer)
@@ -49,6 +66,11 @@ namespace AutoService.Core.Services
             await _repository.AddAsync(customer);
 
             return customer;
+        }
+
+        public Task<bool> DeleteAsync(int id)
+        {
+            throw new NotImplementedException();
         }
 
     }
