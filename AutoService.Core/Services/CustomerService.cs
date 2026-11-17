@@ -33,9 +33,23 @@ namespace AutoService.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> DeleteAsync(int id)
+
+        public async Task<Customer> CreateAsync(Customer customer)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(customer.FirstName))
+            {
+                throw new ArgumentException("First name is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(customer.LastName))
+            {
+                throw new ArgumentException("Last name is required");
+            }
+
+            await _repository.AddAsync(customer);
+
+            return customer;
         }
+
     }
 }
