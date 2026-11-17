@@ -17,5 +17,28 @@ namespace AutoService.Infrastructure.Data
         public DbSet<Part> Parts { get; set; }
         public DbSet<RepairOrderPart> RepairOrderParts { get; set; }
         public DbSet<WorkLog> WorkLogs { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Part>()
+                .Property(p => p.Price)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<RepairOrderPart>()
+                .Property(p => p.UnitPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<WorkLog>()
+                .Property(w => w.HourlyRate)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<WorkLog>()
+                .Property(w => w.HoursWorked)
+                .HasPrecision(9, 2);
+        }
+
     }
 }
