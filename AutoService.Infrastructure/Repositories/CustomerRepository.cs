@@ -47,5 +47,12 @@ namespace AutoService.Infrastructure.Repositories
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> HasCarsAsync(int customerId)
+        {
+            return await _context.Cars
+                .AnyAsync(c => c.CustomerId == customerId);
+        }
+
     }
 }

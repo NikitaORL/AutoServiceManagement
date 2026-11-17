@@ -23,8 +23,18 @@ namespace AutoService.Core.Services
             return await _repository.GetByIdAsync(id);
         }
 
+        public async Task<Customer> CreateAsync(Customer customer)
+        {
+            if (string.IsNullOrWhiteSpace(customer.FirstName))
+                throw new ArgumentException("First name is required");
 
+            if (string.IsNullOrWhiteSpace(customer.LastName))
+                throw new ArgumentException("Last name is required");
 
+            await _repository.AddAsync(customer);
+
+            return customer;
+        }
 
         public async Task<bool> UpdateAsync(int id, Customer customer)
         {
@@ -49,29 +59,20 @@ namespace AutoService.Core.Services
             return true;
         }
 
-
-
-        public async Task<Customer> CreateAsync(Customer customer)
+        public async Task<bool> DeleteAsync(int id)
         {
-            if (string.IsNullOrWhiteSpace(customer.FirstName))
-            {
-                throw new ArgumentException("First name is required");
-            }
+            var customer = await _repository.GetByIdAsync(id);
 
-            if (string.IsNullOrWhiteSpace(customer.LastName))
-            {
-                throw new ArgumentException("Last name is required");
-            }
+            if (customer == null)
+                return false;
 
-            await _repository.AddAsync(customer);
+            if (await _repository.HasCarsAsync(id))
+                throw new InvalidOperationException(
+                    "Cannot delete a customer who has registered cars.");
 
-            return customer;
+            await _repository.DeleteAsync(id);
+
+            return true;
         }
-
-        public Task<bool> DeleteAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }
