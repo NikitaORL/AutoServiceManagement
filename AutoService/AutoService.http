@@ -4,3 +4,14 @@ GET {{AutoService_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Create customer
+POST http://localhost:5260/api/customers
+Content-Type: application/json
+
+{
+  "firstName": "Nikita",
+  "lastName": "Orlenko",
+  "email": "nikita@example.com",
+  "phoneNumber": "55512345"
+}

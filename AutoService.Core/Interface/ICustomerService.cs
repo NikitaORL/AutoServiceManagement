@@ -5,7 +5,7 @@ namespace AutoService.Core.Interfaces
 {
     public interface ICustomerService
     {
-        Task<bool> HasCarsAsync(int customerId);
+        
         Task<List<Customer>> GetAllAsync();
 
         Task<Customer?> GetByIdAsync(int id);

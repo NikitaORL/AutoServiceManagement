@@ -14,5 +14,6 @@ namespace AutoService.Core.Interfaces
         Task UpdateAsync(Customer customer);
 
         Task DeleteAsync(int id);
+        Task<bool> HasCarsAsync(int customerId);
     }
 }
