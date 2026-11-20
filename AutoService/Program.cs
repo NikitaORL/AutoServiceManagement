@@ -10,6 +10,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
+
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
@@ -21,6 +22,10 @@ builder.Services.AddScoped<IRepairOrderService, RepairOrderService>();
 
 builder.Services.AddScoped<IPartRepository, PartRepository>();
 builder.Services.AddScoped<IPartService, PartService>();
+
+builder.Services.AddScoped<IRepairOrderPartRepository, RepairOrderPartRepository>();
+builder.Services.AddScoped<IRepairOrderPartService, RepairOrderPartService>();
+
 
 
 
