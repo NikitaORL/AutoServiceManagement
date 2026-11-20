@@ -58,5 +58,28 @@ namespace AutoService.Controllers
             }
         }
 
+
+
+        // PUT: api/parts/1
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(
+            int id, [FromBody] Part part)
+        {
+            try
+            {
+                var updated = await _service.UpdateAsync(id, part);
+
+                if (!updated)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
     }
 }
