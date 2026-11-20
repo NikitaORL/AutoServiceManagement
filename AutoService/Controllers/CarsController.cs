@@ -67,6 +67,28 @@ namespace AutoService.Controllers
             }
         }
 
+
+        // PUT: api/cars/1
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(
+            int id, [FromBody] Car car)
+        {
+            try
+            {
+                var updated = await _carService.UpdateAsync(id, car);
+
+                if (!updated)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
     }
 }
   
