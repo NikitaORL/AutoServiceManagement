@@ -9,12 +9,18 @@ namespace AutoService.Controllers
     [Route("api/repair-orders")]
     public class RepairOrdersController : ControllerBase
     {
-        private readonly IRepairOrderService _service;
 
-        public RepairOrdersController(IRepairOrderService service)
+        private readonly IRepairOrderService _service;
+        private readonly IRepairOrderPartService _partService;
+
+        public RepairOrdersController(
+            IRepairOrderService service,
+            IRepairOrderPartService partService)
         {
             _service = service;
+            _partService = partService;
         }
+
 
         // GET: api/repair-orders
         [HttpGet]
@@ -101,6 +107,40 @@ namespace AutoService.Controllers
                     return NotFound();
 
                 return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+        }
+
+
+        // POST: api/repair-orders/1/parts
+        [HttpPost("{id:int}/parts")]
+        public async Task<IActionResult> AddPart(
+            int id,
+            [FromQuery] int partId,
+            [FromQuery] int quantity)
+        {
+            try
+            {
+                var result = await _partService.AddToOrderAsync(
+                    id, partId, quantity);
+
+                return Created(
+                    $"/api/repair-orders/{id}/parts",
+                    new
+                    {
+                        result.Id,
+                        result.RepairOrderId,
+                        result.PartId,
+                        result.Quantity,
+                        result.UnitPrice
+                    });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
