@@ -148,6 +148,27 @@ namespace AutoService.Controllers
             }
         }
 
+        // GET: api/repair-orders/1/parts
+        [HttpGet("{id:int}/parts")]
+        public async Task<IActionResult> GetParts(int id)
+        {
+            var order = await _service.GetByIdAsync(id);
+
+            if (order == null)
+                return NotFound();
+
+            var parts = await _partService.GetByOrderIdAsync(id);
+
+            return Ok(parts.Select(p => new
+            {
+                p.Id,
+                p.RepairOrderId,
+                p.PartId,
+                p.Quantity,
+                p.UnitPrice
+            }));
+        }
+
 
 
     }
