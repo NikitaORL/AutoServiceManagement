@@ -36,5 +36,27 @@ namespace AutoService.Controllers
 
             return Ok(part);
         }
+
+
+        // POST: api/parts
+        [HttpPost]
+        public async Task<ActionResult<Part>> Create(
+            [FromBody] Part part)
+        {
+            try
+            {
+                var createdPart = await _service.CreateAsync(part);
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = createdPart.Id },
+                    createdPart);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }

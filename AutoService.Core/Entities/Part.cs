@@ -1,4 +1,6 @@
 
+using System.Text.Json.Serialization;
+
 namespace AutoService.Core.Entities
 {
     public class Part
@@ -14,6 +16,8 @@ namespace AutoService.Core.Entities
         public int StockQuantity { get; set; }
 
         public string Description { get; set; } = string.Empty;
+
+        [JsonIgnore]
         public List<RepairOrderPart> RepairOrderParts { get; set; } = new();
     }
 }
