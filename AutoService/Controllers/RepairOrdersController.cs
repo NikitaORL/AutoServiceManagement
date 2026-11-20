@@ -67,5 +67,27 @@ namespace AutoService.Controllers
             }
         }
 
+
+        // PUT: api/repair-orders/1
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(
+            int id, [FromBody] RepairOrder order)
+        {
+            try
+            {
+                var updated = await _service.UpdateAsync(id, order);
+
+                if (!updated)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
     }
 }
