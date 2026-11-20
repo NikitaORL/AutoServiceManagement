@@ -89,6 +89,28 @@ namespace AutoService.Controllers
         }
 
 
+
+        // DELETE: api/cars/1
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var deleted = await _carService.DeleteAsync(id);
+
+                if (!deleted)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+        }
+
+
+
     }
 }
   
