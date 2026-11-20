@@ -41,7 +41,7 @@ namespace AutoService.Controllers
         // POST: api/parts
         [HttpPost]
         public async Task<ActionResult<Part>> Create(
-            [FromBody] Part part)
+            [FromBody] Part part)/
         {
             try
             {
