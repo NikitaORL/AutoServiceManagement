@@ -46,5 +46,27 @@ namespace AutoService.Controllers
 
             return Ok(cars);
         }
+
+        // POST: api/cars
+        [HttpPost]
+        public async Task<ActionResult<Car>> Create(
+            [FromBody] Car car)
+        {
+            try
+            {
+                var createdCar = await _carService.CreateAsync(car);
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = createdCar.Id },
+                    createdCar);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }
+  

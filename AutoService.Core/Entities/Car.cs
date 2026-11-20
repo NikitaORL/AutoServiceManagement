@@ -1,4 +1,6 @@
 ﻿
+using System.Text.Json.Serialization;
+
 namespace AutoService.Core.Entities
 {
     public class Car
@@ -15,8 +17,10 @@ namespace AutoService.Core.Entities
 
         public int CustomerId { get; set; }
 
-        public Customer Customer { get; set; } = null!;
-        public List<RepairOrder> RepairOrders { get; set; } = new();
+        [JsonIgnore]
+        public Customer? Customer { get; set; }
 
+        [JsonIgnore]
+        public List<RepairOrder> RepairOrders { get; set; } = new();
     }
 }
