@@ -57,5 +57,27 @@ namespace AutoService.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+
+        // PUT: api/customers/1
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(
+            int id, [FromBody] Customer customer)
+        {
+            try
+            {
+                var updated = await _customerService.UpdateAsync(id, customer);
+
+                if (!updated)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }
