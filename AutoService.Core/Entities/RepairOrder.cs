@@ -1,4 +1,6 @@
 
+using System.Text.Json.Serialization;
+
 namespace AutoService.Core.Entities
 {
     public class RepairOrder
@@ -7,7 +9,8 @@ namespace AutoService.Core.Entities
 
         public int CarId { get; set; }
 
-        public Car Car { get; set; } = null!;
+        [JsonIgnore]
+        public Car? Car { get; set; }
 
         public string Description { get; set; } = string.Empty;
 
@@ -17,8 +20,10 @@ namespace AutoService.Core.Entities
 
         public DateTime? CompletedAt { get; set; }
 
+        [JsonIgnore]
         public List<RepairOrderPart> Parts { get; set; } = new();
 
+        [JsonIgnore]
         public List<WorkLog> WorkLogs { get; set; } = new();
     }
 }

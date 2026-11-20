@@ -45,5 +45,27 @@ namespace AutoService.Controllers
 
             return Ok(orders);
         }
+
+
+        // POST: api/repair-orders
+        [HttpPost]
+        public async Task<ActionResult<RepairOrder>> Create(
+            [FromBody] RepairOrder order)
+        {
+            try
+            {
+                var createdOrder = await _service.CreateAsync(order);
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = createdOrder.Id },
+                    createdOrder);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }
