@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoService.Controllers
 {
-    [Authorize(Roles = "Admin,Service")]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/customers")]
     public class CustomersController : ControllerBase
