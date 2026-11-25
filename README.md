@@ -90,7 +90,7 @@ Mechanics are assigned with `PUT /api/repair-orders/{id}/assign`. Each work log 
 | GET/POST | `/api/notifications/...` |
 | WebSocket | `/ws/orders` — authenticated SignalR notifications |
 
-The GET list endpoints accept `search`, `sort`, `page`, `pageSize`. Repair invoices use stored part-price and hourly-rate snapshots and the configurable VAT rate in `Invoice:VatRate` (default `0.24`).
+The GET list endpoints accept `search`, `sort`, `page`, `pageSize`. Labor entries receive the server-controlled hourly rate from `Labor:DefaultHourlyRate`, not from the mechanic's request. Repair invoices use stored part-price and hourly-rate snapshots and the configurable VAT rate in `Invoice:VatRate` (default `0.24`).
 
 The `AutoService/AutoService.http` file contains example HTTP requests for testing.
 
