@@ -86,7 +86,7 @@ Content-Type: application/json
 }
 
 ### Mechanic records labor (the server takes mechanic ID from JWT)
-POST {{host}}/api/repair-orders/1/worklogs?description=Replace%20brake%20pads&hoursWorked=2&hourlyRate=35
+POST {{host}}/api/repair-orders/1/worklogs?description=Replace%20brake%20pads&hoursWorked=2
 Authorization: Bearer {{mechanicToken}}
 
 ### Mechanic consumes spare parts
