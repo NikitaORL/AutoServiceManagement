@@ -8,13 +8,16 @@ namespace AutoService.Core.Services
     {
         private readonly IRepairOrderRepository _repository;
         private readonly ICarRepository _carRepository;
+        private readonly IOrderStatusNotifier _notifier;
 
         public RepairOrderService(
             IRepairOrderRepository repository,
-            ICarRepository carRepository)
+            ICarRepository carRepository,
+            IOrderStatusNotifier notifier)
         {
             _repository = repository;
             _carRepository = carRepository;
+            _notifier = notifier;
         }
 
         public async Task<List<RepairOrder>> GetAllAsync()
@@ -66,6 +69,7 @@ namespace AutoService.Core.Services
                 order.Status != "Completed")
                 throw new ArgumentException("Invalid status");
 
+            var statusChanged = existingOrder.Status != order.Status;
             existingOrder.Description = order.Description;
             existingOrder.Status = order.Status;
 
@@ -75,6 +79,9 @@ namespace AutoService.Core.Services
                 existingOrder.CompletedAt = null;
 
             await _repository.UpdateAsync(existingOrder);
+
+            if (statusChanged)
+                await _notifier.NotifyStatusChangedAsync(existingOrder);
 
             return true;
         }
