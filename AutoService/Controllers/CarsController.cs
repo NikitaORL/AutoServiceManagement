@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoService.Controllers
 {
-    [Authorize(Roles = "Admin,Service")]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/cars")]
     public class CarsController : ControllerBase
@@ -75,7 +75,7 @@ namespace AutoService.Controllers
         }
 
         // POST: api/cars
-        [Authorize(Roles = "Admin,Service")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Car>> Create(
             [FromBody] CarRequest request)
@@ -98,7 +98,7 @@ namespace AutoService.Controllers
 
 
         // PUT: api/cars/1
-        [Authorize(Roles = "Admin,Service")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(
             int id, [FromBody] CarRequest request)
@@ -122,7 +122,7 @@ namespace AutoService.Controllers
 
 
         // DELETE: api/cars/1
-        [Authorize(Roles = "Admin,Service")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
