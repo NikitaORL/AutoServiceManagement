@@ -111,6 +111,23 @@ namespace AutoService.Controllers
 
 
 
+
+        // GET: api/cars/1/history
+        [HttpGet("{id:int}/history")]
+        public async Task<IActionResult> GetHistory(
+            int id,
+            [FromServices] IRepairOrderService repairOrders)
+        {
+            var car = await _carService.GetByIdAsync(id);
+
+            if (car == null)
+                return NotFound();
+
+            var history = await repairOrders.GetByCarIdAsync(id);
+
+            return Ok(history.OrderByDescending(r => r.CreatedAt));
+        }
+
     }
 }
   
