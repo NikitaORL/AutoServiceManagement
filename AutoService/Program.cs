@@ -30,6 +30,13 @@ builder.Services.AddScoped<IRepairOrderPartService, RepairOrderPartService>();
 builder.Services.AddScoped<IWorkLogRepository, WorkLogRepository>();
 builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 
+builder.Services.AddScoped<IInvoiceService>(sp =>
+    new InvoiceService(
+        sp.GetRequiredService<IRepairOrderRepository>(),
+        sp.GetRequiredService<IRepairOrderPartService>(),
+        sp.GetRequiredService<IWorkLogService>(),
+        builder.Configuration.GetValue<decimal>("Invoice:VatRate")));
+
 
 
 
