@@ -11,6 +11,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 
+
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
@@ -25,6 +26,10 @@ builder.Services.AddScoped<IPartService, PartService>();
 
 builder.Services.AddScoped<IRepairOrderPartRepository, RepairOrderPartRepository>();
 builder.Services.AddScoped<IRepairOrderPartService, RepairOrderPartService>();
+
+builder.Services.AddScoped<IWorkLogRepository, WorkLogRepository>();
+builder.Services.AddScoped<IWorkLogService, WorkLogService>();
+
 
 
 
