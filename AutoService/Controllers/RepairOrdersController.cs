@@ -19,19 +19,22 @@ namespace AutoService.Controllers
         private readonly IWorkLogService _workLogService;
         private readonly IInvoiceService _invoiceService;
         private readonly AppDbContext _db;
+        private readonly IConfiguration _configuration;
 
         public RepairOrdersController(
             IRepairOrderService service,
             IRepairOrderPartService partService,
             IWorkLogService workLogService,
             IInvoiceService invoiceService,
-            AppDbContext db)
+            AppDbContext db,
+            IConfiguration configuration)
         {
             _service = service;
             _partService = partService;
             _workLogService = workLogService;
             _invoiceService = invoiceService;
             _db = db;
+            _configuration = configuration;
         }
 
         private bool CanAccess(RepairOrder order)
@@ -261,8 +264,7 @@ namespace AutoService.Controllers
         public async Task<IActionResult> AddWorkLog(
             int id,
             [FromQuery] string description,
-            [FromQuery] decimal hoursWorked,
-            [FromQuery] decimal hourlyRate)
+            [FromQuery] decimal hoursWorked)
         {
             var order = await _service.GetByIdAsync(id);
             if (order == null || !CanAccess(order))
@@ -274,7 +276,7 @@ namespace AutoService.Controllers
                 MechanicUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty,
                 Description = description,
                 HoursWorked = hoursWorked,
-                HourlyRate = hourlyRate
+                HourlyRate = _configuration.GetValue<decimal>("Labor:DefaultHourlyRate")
             };
 
             try
