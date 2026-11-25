@@ -181,8 +181,8 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();
-app.UseCors("MvcClient");
 app.UseRouting();
+app.UseCors("MvcClient");
 app.UseRateLimiter();
 app.UseAuthentication();
 
