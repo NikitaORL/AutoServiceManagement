@@ -55,6 +55,12 @@ namespace AutoService.Core.DTO
         public string Status { get; set; } = "Pending";
     }
 
+    public class RepairStatusRequest
+    {
+        [Required, RegularExpression("Pending|InProgress|Completed")]
+        public string Status { get; set; } = "Pending";
+    }
+
     public class AssignMechanicRequest
     {
         [Range(1, int.MaxValue)]
