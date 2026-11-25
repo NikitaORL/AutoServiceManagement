@@ -32,11 +32,35 @@ namespace AutoService.Controllers
 
         // GET: api/repair-orders
         [HttpGet]
-        public async Task<ActionResult<List<RepairOrder>>> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? search = null,
+            [FromQuery] string sort = "date",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
         {
-            var orders = await _service.GetAllAsync();
+            if (page < 1 || pageSize < 1 || pageSize > 100)
+                return BadRequest(new { message = "Page must be positive and pageSize must be 1-100" });
 
-            return Ok(orders);
+            if (sort != "date" && sort != "status" && sort != "id")
+                return BadRequest(new { message = "Unsupported sort field" });
+
+            var orders = await _service.GetAllAsync();
+            var query = orders.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(o => o.Status.Contains(search, StringComparison.OrdinalIgnoreCase) || o.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
+
+            query = sort switch
+            {
+                "date" => query.OrderBy(o => o.CreatedAt).ThenBy(x => x.Id),
+                "status" => query.OrderBy(o => o.Status).ThenBy(x => x.Id),
+                _ => query.OrderBy(x => x.Id)
+            };
+
+            int total = query.Count();
+            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/repair-orders/1
