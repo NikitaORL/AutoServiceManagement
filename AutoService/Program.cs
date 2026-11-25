@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using AutoService.OpenApi;
 using AutoService.Hubs;
 using AutoService.Services;
@@ -56,6 +57,22 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddProblemDetails();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
+
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IOrderStatusNotifier, OrderStatusNotifier>();
 builder.Services.AddCors(options =>
@@ -165,6 +182,8 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();
 app.UseCors("MvcClient");
+app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 
 app.UseAuthorization();
