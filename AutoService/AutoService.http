@@ -1,17 +1,135 @@
-@AutoService_HostAddress = http://localhost:5260
+@host = https://localhost:7146
+@adminToken = PASTE_ADMIN_JWT_HERE
+@mechanicToken = PASTE_MECHANIC_JWT_HERE
+@customerToken = PASTE_CUSTOMER_JWT_HERE
+@serviceToken = PASTE_SERVICE_JWT_HERE
 
-GET {{AutoService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
-
-### Create customer
-POST http://localhost:5260/api/customers
+### Register a new customer (creates a new owned customer record)
+POST {{host}}/api/auth/register
 Content-Type: application/json
 
 {
-  "firstName": "Nikita",
-  "lastName": "Orlenko",
-  "email": "nikita@example.com",
+  "firstName": "Demo",
+  "lastName": "Customer",
+  "email": "demo.customer@example.test",
+  "password": "REPLACE_WITH_STRONG_PASSWORD"
+}
+
+### Login - copy the returned token into the matching variable above
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.test",
+  "password": "REPLACE_WITH_ADMIN_PASSWORD"
+}
+
+### Admin creates mechanic / Service account
+POST {{host}}/api/auth/staff
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "mechanic@example.test",
+  "password": "REPLACE_WITH_STRONG_PASSWORD",
+  "role": "Mechanic"
+}
+
+### Create a customer (admin)
+POST {{host}}/api/customers
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Sample",
+  "lastName": "Person",
+  "email": "sample.person@example.test",
   "phoneNumber": "55512345"
 }
+
+### Search cars (admin)
+GET {{host}}/api/cars?search=Volkswagen&sort=brand&page=1&pageSize=20
+Authorization: Bearer {{adminToken}}
+
+### Create car with next maintenance date (admin)
+POST {{host}}/api/cars
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "brand": "Volkswagen",
+  "model": "Passat",
+  "year": 2010,
+  "licensePlate": "123ABC",
+  "customerId": 1,
+  "nextServiceDate": "2027-02-01T00:00:00Z"
+}
+
+### Create repair order (admin)
+POST {{host}}/api/repair-orders
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "carId": 1,
+  "description": "Replace brake pads",
+  "status": "Pending"
+}
+
+### Assign mechanic user 2 to repair order 1 (admin)
+PUT {{host}}/api/repair-orders/1/assign
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "mechanicUserId": 2
+}
+
+### Mechanic records labor (the server takes mechanic ID from JWT)
+POST {{host}}/api/repair-orders/1/worklogs?description=Replace%20brake%20pads&hoursWorked=2&hourlyRate=35
+Authorization: Bearer {{mechanicToken}}
+
+### Mechanic consumes spare parts
+POST {{host}}/api/repair-orders/1/parts?partId=2&quantity=1
+Authorization: Bearer {{mechanicToken}}
+
+### Mechanic marks own repair completed
+PATCH {{host}}/api/repair-orders/1/status
+Authorization: Bearer {{mechanicToken}}
+Content-Type: application/json
+
+{
+  "status": "Completed"
+}
+
+### Invoice (admin or assigned mechanic)
+GET {{host}}/api/repair-orders/1/invoice
+Authorization: Bearer {{adminToken}}
+
+### Customer sees only own cars
+GET {{host}}/api/me/cars
+Authorization: Bearer {{customerToken}}
+
+### Customer sees own invoices
+GET {{host}}/api/me/repair-orders/1/invoice
+Authorization: Bearer {{customerToken}}
+
+### Customer notification inbox
+GET {{host}}/api/me/notifications
+Authorization: Bearer {{customerToken}}
+
+### Worker: completed but not-yet-notified orders
+GET {{host}}/api/notifications/pending-ready
+Authorization: Bearer {{serviceToken}}
+
+### Worker: create idempotent order-ready notification
+POST {{host}}/api/notifications/order-ready/1
+Authorization: Bearer {{serviceToken}}
+
+### Worker: cars requiring maintenance within 14 days
+GET {{host}}/api/cars/service-due?days=14
+Authorization: Bearer {{serviceToken}}
+
+### Worker: create idempotent maintenance notification
+POST {{host}}/api/notifications/maintenance/1
+Authorization: Bearer {{serviceToken}}
