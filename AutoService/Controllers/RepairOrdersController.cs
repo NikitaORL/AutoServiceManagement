@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoService.Controllers
 {
-    [Authorize(Roles = "Admin,Mechanic,Service")]
+    [Authorize(Roles = "Admin,Mechanic")]
     [ApiController]
     [Route("api/repair-orders")]
     public class RepairOrdersController : ControllerBase
@@ -106,7 +106,7 @@ namespace AutoService.Controllers
             return Ok(orders.Where(CanAccess).OrderByDescending(o => o.CreatedAt).Select(ToResponse));
         }
 
-        [Authorize(Roles = "Admin,Service")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(RepairOrderRequest request)
         {
@@ -126,7 +126,7 @@ namespace AutoService.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,Service")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, RepairOrderRequest request)
         {
@@ -172,7 +172,7 @@ namespace AutoService.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,Service")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}/assign")]
         public async Task<IActionResult> AssignMechanic(int id, AssignMechanicRequest request)
         {
@@ -191,7 +191,7 @@ namespace AutoService.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Admin,Service")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
