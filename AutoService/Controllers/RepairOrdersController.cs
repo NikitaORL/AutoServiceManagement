@@ -1,10 +1,11 @@
-using AutoService.Core.DTO;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
-﻿
+using AutoService.Core.DTO;
 using AutoService.Core.Entities;
 using AutoService.Core.Interfaces;
+using AutoService.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AutoService.Controllers
 {
@@ -13,28 +14,47 @@ namespace AutoService.Controllers
     [Route("api/repair-orders")]
     public class RepairOrdersController : ControllerBase
     {
-
-
         private readonly IRepairOrderService _service;
         private readonly IRepairOrderPartService _partService;
         private readonly IWorkLogService _workLogService;
         private readonly IInvoiceService _invoiceService;
+        private readonly AppDbContext _db;
 
         public RepairOrdersController(
             IRepairOrderService service,
             IRepairOrderPartService partService,
             IWorkLogService workLogService,
-            IInvoiceService invoiceService)
+            IInvoiceService invoiceService,
+            AppDbContext db)
         {
             _service = service;
             _partService = partService;
             _workLogService = workLogService;
             _invoiceService = invoiceService;
+            _db = db;
         }
 
+        private bool CanAccess(RepairOrder order)
+        {
+            if (!User.IsInRole("Mechanic"))
+                return true;
 
+            return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId)
+                && order.AssignedMechanicUserId == userId;
+        }
 
-        // GET: api/repair-orders
+        private static RepairOrderResponse ToResponse(RepairOrder order)
+        {
+            return new RepairOrderResponse(
+                order.Id,
+                order.CarId,
+                order.Description,
+                order.Status,
+                order.CreatedAt,
+                order.CompletedAt,
+                order.AssignedMechanicUserId);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? search = null,
@@ -42,67 +62,63 @@ namespace AutoService.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
-            if (page < 1 || pageSize < 1 || pageSize > 100)
-                return BadRequest(new { message = "Page must be positive and pageSize must be 1-100" });
+            if (page < 1 || page > 100000 || pageSize < 1 || pageSize > 100)
+                return BadRequest(new { message = "Invalid page or pageSize" });
 
             if (sort != "date" && sort != "status" && sort != "id")
                 return BadRequest(new { message = "Unsupported sort field" });
 
             var orders = await _service.GetAllAsync();
-            var query = orders.AsEnumerable();
+            var query = orders.Where(CanAccess).AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(o => o.Status.Contains(search, StringComparison.OrdinalIgnoreCase) || o.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(o =>
+                    o.Status.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    o.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
 
             query = sort switch
             {
-                "date" => query.OrderBy(o => o.CreatedAt).ThenBy(x => x.Id),
-                "status" => query.OrderBy(o => o.Status).ThenBy(x => x.Id),
-                _ => query.OrderBy(x => x.Id)
+                "date" => query.OrderByDescending(o => o.CreatedAt).ThenBy(o => o.Id),
+                "status" => query.OrderBy(o => o.Status).ThenBy(o => o.Id),
+                _ => query.OrderBy(o => o.Id)
             };
 
             int total = query.Count();
-            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var items = query.Skip((page - 1) * pageSize).Take(pageSize).Select(ToResponse).ToList();
 
-            return Ok(new { items = items.Select(o => new RepairOrderResponse(o.Id, o.CarId, o.Description, o.Status, o.CreatedAt, o.CompletedAt)), total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
+            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
-        // GET: api/repair-orders/1
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<RepairOrder>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             var order = await _service.GetByIdAsync(id);
-
-            if (order == null)
+            if (order == null || !CanAccess(order))
                 return NotFound();
 
-            return Ok(new RepairOrderResponse(order.Id, order.CarId, order.Description, order.Status, order.CreatedAt, order.CompletedAt));
+            return Ok(ToResponse(order));
         }
 
-        // GET: api/repair-orders/car/1
         [HttpGet("car/{carId:int}")]
-        public async Task<ActionResult<List<RepairOrder>>> GetByCarId(int carId)
+        public async Task<IActionResult> GetByCarId(int carId)
         {
             var orders = await _service.GetByCarIdAsync(carId);
-
-            return Ok(orders.Select(o => new RepairOrderResponse(o.Id, o.CarId, o.Description, o.Status, o.CreatedAt, o.CompletedAt)));
+            return Ok(orders.Where(CanAccess).OrderByDescending(o => o.CreatedAt).Select(ToResponse));
         }
 
-
-        // POST: api/repair-orders
+        [Authorize(Roles = "Admin,Service")]
         [HttpPost]
-        public async Task<ActionResult<RepairOrder>> Create(
-            [FromBody] RepairOrderRequest request)
+        public async Task<IActionResult> Create(RepairOrderRequest request)
         {
-            var order = new RepairOrder { CarId = request.CarId, Description = request.Description, Status = request.Status };
             try
             {
-                var createdOrder = await _service.CreateAsync(order);
+                var order = await _service.CreateAsync(new RepairOrder
+                {
+                    CarId = request.CarId,
+                    Description = request.Description
+                });
 
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = createdOrder.Id },
-                    new RepairOrderResponse(createdOrder.Id, createdOrder.CarId, createdOrder.Description, createdOrder.Status, createdOrder.CreatedAt, createdOrder.CompletedAt));
+                return CreatedAtAction(nameof(GetById), new { id = order.Id }, ToResponse(order));
             }
             catch (ArgumentException ex)
             {
@@ -110,19 +126,43 @@ namespace AutoService.Controllers
             }
         }
 
-
-        // PUT: api/repair-orders/1
+        [Authorize(Roles = "Admin,Service")]
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(
-            int id, [FromBody] RepairOrderRequest request)
+        public async Task<IActionResult> Update(int id, RepairOrderRequest request)
         {
-            var order = new RepairOrder { CarId = request.CarId, Description = request.Description, Status = request.Status };
             try
             {
-                var updated = await _service.UpdateAsync(id, order);
+                var updated = await _service.UpdateAsync(id, new RepairOrder
+                {
+                    CarId = request.CarId,
+                    Description = request.Description,
+                    Status = request.Status
+                });
 
-                if (!updated)
-                    return NotFound();
+                return updated ? NoContent() : NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPatch("{id:int}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, RepairStatusRequest request)
+        {
+            var existing = await _service.GetByIdAsync(id);
+
+            if (existing == null || !CanAccess(existing))
+                return NotFound();
+
+            try
+            {
+                await _service.UpdateAsync(id, new RepairOrder
+                {
+                    CarId = existing.CarId,
+                    Description = existing.Description,
+                    Status = request.Status
+                });
 
                 return NoContent();
             }
@@ -132,19 +172,32 @@ namespace AutoService.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Service")]
+        [HttpPut("{id:int}/assign")]
+        public async Task<IActionResult> AssignMechanic(int id, AssignMechanicRequest request)
+        {
+            var order = await _service.GetByIdAsync(id);
+            if (order == null)
+                return NotFound();
 
-        // DELETE: api/repair-orders/1
+            bool isMechanic = await _db.Users.AnyAsync(u =>
+                u.Id == request.MechanicUserId && u.Role == "Mechanic");
+
+            if (!isMechanic)
+                return BadRequest(new { message = "Mechanic account not found" });
+
+            order.AssignedMechanicUserId = request.MechanicUserId;
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Admin,Service")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var deleted = await _service.DeleteAsync(id);
-
-                if (!deleted)
-                    return NotFound();
-
-                return NoContent();
+                return await _service.DeleteAsync(id) ? NoContent() : NotFound();
             }
             catch (InvalidOperationException ex)
             {
@@ -152,29 +205,28 @@ namespace AutoService.Controllers
             }
         }
 
-
-        // POST: api/repair-orders/1/parts
         [HttpPost("{id:int}/parts")]
         public async Task<IActionResult> AddPart(
             int id,
             [FromQuery] int partId,
             [FromQuery] int quantity)
         {
+            var order = await _service.GetByIdAsync(id);
+            if (order == null || !CanAccess(order))
+                return NotFound();
+
             try
             {
-                var result = await _partService.AddToOrderAsync(
-                    id, partId, quantity);
+                var result = await _partService.AddToOrderAsync(id, partId, quantity);
 
-                return Created(
-                    $"/api/repair-orders/{id}/parts",
-                    new
-                    {
-                        result.Id,
-                        result.RepairOrderId,
-                        result.PartId,
-                        result.Quantity,
-                        result.UnitPrice
-                    });
+                return Created($"/api/repair-orders/{id}/parts", new
+                {
+                    result.Id,
+                    result.RepairOrderId,
+                    result.PartId,
+                    result.Quantity,
+                    result.UnitPrice
+                });
             }
             catch (ArgumentException ex)
             {
@@ -186,17 +238,14 @@ namespace AutoService.Controllers
             }
         }
 
-        // GET: api/repair-orders/1/parts
         [HttpGet("{id:int}/parts")]
         public async Task<IActionResult> GetParts(int id)
         {
             var order = await _service.GetByIdAsync(id);
-
-            if (order == null)
+            if (order == null || !CanAccess(order))
                 return NotFound();
 
             var parts = await _partService.GetByOrderIdAsync(id);
-
             return Ok(parts.Select(p => new
             {
                 p.Id,
@@ -207,8 +256,6 @@ namespace AutoService.Controllers
             }));
         }
 
-
-        // POST: api/repair-orders/1/worklogs
         [Authorize(Roles = "Mechanic")]
         [HttpPost("{id:int}/worklogs")]
         public async Task<IActionResult> AddWorkLog(
@@ -217,6 +264,10 @@ namespace AutoService.Controllers
             [FromQuery] decimal hoursWorked,
             [FromQuery] decimal hourlyRate)
         {
+            var order = await _service.GetByIdAsync(id);
+            if (order == null || !CanAccess(order))
+                return NotFound();
+
             var workLog = new WorkLog
             {
                 RepairOrderId = id,
@@ -230,18 +281,16 @@ namespace AutoService.Controllers
             {
                 var result = await _workLogService.CreateAsync(workLog);
 
-                return Created(
-                    $"/api/repair-orders/{id}/worklogs",
-                    new
-                    {
-                        result.Id,
-                        result.RepairOrderId,
-                        result.MechanicUserId,
-                        result.Description,
-                        result.HoursWorked,
-                        result.HourlyRate,
-                        result.WorkDate
-                    });
+                return Created($"/api/repair-orders/{id}/worklogs", new
+                {
+                    result.Id,
+                    result.RepairOrderId,
+                    result.MechanicUserId,
+                    result.Description,
+                    result.HoursWorked,
+                    result.HourlyRate,
+                    result.WorkDate
+                });
             }
             catch (ArgumentException ex)
             {
@@ -249,19 +298,15 @@ namespace AutoService.Controllers
             }
         }
 
-
-        // GET: api/repair-orders/1/worklogs
         [HttpGet("{id:int}/worklogs")]
         public async Task<IActionResult> GetWorkLogs(int id)
         {
             var order = await _service.GetByIdAsync(id);
-
-            if (order == null)
+            if (order == null || !CanAccess(order))
                 return NotFound();
 
-            var workLogs = await _workLogService.GetByOrderIdAsync(id);
-
-            return Ok(workLogs.Select(w => new
+            var logs = await _workLogService.GetByOrderIdAsync(id);
+            return Ok(logs.Select(w => new
             {
                 w.Id,
                 w.RepairOrderId,
@@ -274,20 +319,15 @@ namespace AutoService.Controllers
             }));
         }
 
-
-
-
-        // GET: api/repair-orders/1/invoice
         [HttpGet("{id:int}/invoice")]
         public async Task<IActionResult> GetInvoice(int id)
         {
-            var invoice = await _invoiceService.GetInvoiceAsync(id);
-
-            if (invoice == null)
+            var order = await _service.GetByIdAsync(id);
+            if (order == null || !CanAccess(order))
                 return NotFound();
 
-            return Ok(invoice);
+            var invoice = await _invoiceService.GetInvoiceAsync(id);
+            return invoice == null ? NotFound() : Ok(invoice);
         }
-
     }
 }
