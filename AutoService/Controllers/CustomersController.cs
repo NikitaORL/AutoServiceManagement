@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 ﻿
 using AutoService.Core.Entities;
 using AutoService.Core.Interfaces;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoService.Controllers
 {
+    [Authorize(Roles = "Admin,Service")]
     [ApiController]
     [Route("api/customers")]
     public class CustomersController : ControllerBase
