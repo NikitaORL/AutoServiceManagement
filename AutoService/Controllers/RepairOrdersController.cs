@@ -1,3 +1,4 @@
+using AutoService.Core.DTO;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 ﻿
@@ -63,7 +64,7 @@ namespace AutoService.Controllers
             int total = query.Count();
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
+            return Ok(new { items = items.Select(o => new RepairOrderResponse(o.Id, o.CarId, o.Description, o.Status, o.CreatedAt, o.CompletedAt)), total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/repair-orders/1
@@ -75,7 +76,7 @@ namespace AutoService.Controllers
             if (order == null)
                 return NotFound();
 
-            return Ok(order);
+            return Ok(new RepairOrderResponse(order.Id, order.CarId, order.Description, order.Status, order.CreatedAt, order.CompletedAt));
         }
 
         // GET: api/repair-orders/car/1
@@ -84,15 +85,16 @@ namespace AutoService.Controllers
         {
             var orders = await _service.GetByCarIdAsync(carId);
 
-            return Ok(orders);
+            return Ok(orders.Select(o => new RepairOrderResponse(o.Id, o.CarId, o.Description, o.Status, o.CreatedAt, o.CompletedAt)));
         }
 
 
         // POST: api/repair-orders
         [HttpPost]
         public async Task<ActionResult<RepairOrder>> Create(
-            [FromBody] RepairOrder order)
+            [FromBody] RepairOrderRequest request)
         {
+            var order = new RepairOrder { CarId = request.CarId, Description = request.Description, Status = request.Status };
             try
             {
                 var createdOrder = await _service.CreateAsync(order);
@@ -100,7 +102,7 @@ namespace AutoService.Controllers
                 return CreatedAtAction(
                     nameof(GetById),
                     new { id = createdOrder.Id },
-                    createdOrder);
+                    new RepairOrderResponse(createdOrder.Id, createdOrder.CarId, createdOrder.Description, createdOrder.Status, createdOrder.CreatedAt, createdOrder.CompletedAt));
             }
             catch (ArgumentException ex)
             {
@@ -112,8 +114,9 @@ namespace AutoService.Controllers
         // PUT: api/repair-orders/1
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(
-            int id, [FromBody] RepairOrder order)
+            int id, [FromBody] RepairOrderRequest request)
         {
+            var order = new RepairOrder { CarId = request.CarId, Description = request.Description, Status = request.Status };
             try
             {
                 var updated = await _service.UpdateAsync(id, order);
