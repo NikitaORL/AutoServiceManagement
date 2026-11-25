@@ -90,5 +90,21 @@ namespace AutoService.Controllers
 
             return Ok(invoice);
         }
+        [HttpGet("notifications")]
+        public async Task<IActionResult> MyNotifications()
+        {
+            var customerId = CustomerId();
+            if (customerId == null) return Forbid();
+
+            var notifications = await _db.Notifications.AsNoTracking()
+                .Where(n => n.CustomerId == customerId)
+                .OrderByDescending(n => n.CreatedAt)
+                .Select(n => new { n.Id, n.Message, n.CreatedAt })
+                .ToListAsync();
+
+            return Ok(notifications);
+        }
+
+
     }
 }
