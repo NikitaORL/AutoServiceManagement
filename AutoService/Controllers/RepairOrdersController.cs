@@ -10,16 +10,21 @@ namespace AutoService.Controllers
     public class RepairOrdersController : ControllerBase
     {
 
+
         private readonly IRepairOrderService _service;
         private readonly IRepairOrderPartService _partService;
+        private readonly IWorkLogService _workLogService;
 
         public RepairOrdersController(
             IRepairOrderService service,
-            IRepairOrderPartService partService)
+            IRepairOrderPartService partService,
+            IWorkLogService workLogService)
         {
             _service = service;
             _partService = partService;
+            _workLogService = workLogService;
         }
+
 
 
         // GET: api/repair-orders
@@ -168,6 +173,49 @@ namespace AutoService.Controllers
                 p.UnitPrice
             }));
         }
+
+
+        // POST: api/repair-orders/1/worklogs
+        [HttpPost("{id:int}/worklogs")]
+        public async Task<IActionResult> AddWorkLog(
+            int id,
+            [FromQuery] string mechanicUserId,
+            [FromQuery] string description,
+            [FromQuery] decimal hoursWorked,
+            [FromQuery] decimal hourlyRate)
+        {
+            var workLog = new WorkLog
+            {
+                RepairOrderId = id,
+                MechanicUserId = mechanicUserId,
+                Description = description,
+                HoursWorked = hoursWorked,
+                HourlyRate = hourlyRate
+            };
+
+            try
+            {
+                var result = await _workLogService.CreateAsync(workLog);
+
+                return Created(
+                    $"/api/repair-orders/{id}/worklogs",
+                    new
+                    {
+                        result.Id,
+                        result.RepairOrderId,
+                        result.MechanicUserId,
+                        result.Description,
+                        result.HoursWorked,
+                        result.HourlyRate,
+                        result.WorkDate
+                    });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
 
 
 
