@@ -1,3 +1,5 @@
+using AutoService.Hubs;
+using AutoService.Services;
 using AutoService.Core.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +22,16 @@ if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments("/ws/orders"))
+                    context.Token = token;
+                return Task.CompletedTask;
+            }
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -43,6 +55,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddProblemDetails();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IOrderStatusNotifier, OrderStatusNotifier>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MvcClient", policy =>
@@ -152,5 +166,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<OrderHub>("/ws/orders");
 
 app.Run();
