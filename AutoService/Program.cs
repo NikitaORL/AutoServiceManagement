@@ -1,3 +1,4 @@
+using AutoService.OpenApi;
 using AutoService.Hubs;
 using AutoService.Services;
 using AutoService.Core.Entities;
@@ -108,7 +109,10 @@ builder.Services.AddScoped<IInvoiceService>(sp =>
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 
 var app = builder.Build();
 
