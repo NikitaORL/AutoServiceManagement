@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 ﻿
 using AutoService.Core.Entities;
 using AutoService.Core.Interfaces;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoService.Controllers
 {
+    [Authorize(Roles = "Admin,Mechanic,Service")]
     [ApiController]
     [Route("api/cars")]
     public class CarsController : ControllerBase
@@ -72,6 +74,7 @@ namespace AutoService.Controllers
         }
 
         // POST: api/cars
+        [Authorize(Roles = "Admin,Service")]
         [HttpPost]
         public async Task<ActionResult<Car>> Create(
             [FromBody] Car car)
@@ -93,6 +96,7 @@ namespace AutoService.Controllers
 
 
         // PUT: api/cars/1
+        [Authorize(Roles = "Admin,Service")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(
             int id, [FromBody] Car car)
@@ -115,6 +119,7 @@ namespace AutoService.Controllers
 
 
         // DELETE: api/cars/1
+        [Authorize(Roles = "Admin,Service")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
