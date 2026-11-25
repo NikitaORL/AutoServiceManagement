@@ -18,11 +18,35 @@ namespace AutoService.Controllers
 
         // GET: api/parts
         [HttpGet]
-        public async Task<ActionResult<List<Part>>> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? search = null,
+            [FromQuery] string sort = "name",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
         {
-            var parts = await _service.GetAllAsync();
+            if (page < 1 || pageSize < 1 || pageSize > 100)
+                return BadRequest(new { message = "Page must be positive and pageSize must be 1-100" });
 
-            return Ok(parts);
+            if (sort != "name" && sort != "price" && sort != "id")
+                return BadRequest(new { message = "Unsupported sort field" });
+
+            var parts = await _service.GetAllAsync();
+            var query = parts.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(p => p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || p.PartNumber.Contains(search, StringComparison.OrdinalIgnoreCase));
+
+            query = sort switch
+            {
+                "name" => query.OrderBy(p => p.Name).ThenBy(x => x.Id),
+                "price" => query.OrderBy(p => p.Price).ThenBy(x => x.Id),
+                _ => query.OrderBy(x => x.Id)
+            };
+
+            int total = query.Count();
+            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/parts/1
