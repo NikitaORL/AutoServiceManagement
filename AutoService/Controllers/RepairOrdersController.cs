@@ -217,6 +217,31 @@ namespace AutoService.Controllers
         }
 
 
+        // GET: api/repair-orders/1/worklogs
+        [HttpGet("{id:int}/worklogs")]
+        public async Task<IActionResult> GetWorkLogs(int id)
+        {
+            var order = await _service.GetByIdAsync(id);
+
+            if (order == null)
+                return NotFound();
+
+            var workLogs = await _workLogService.GetByOrderIdAsync(id);
+
+            return Ok(workLogs.Select(w => new
+            {
+                w.Id,
+                w.RepairOrderId,
+                w.MechanicUserId,
+                w.Description,
+                w.HoursWorked,
+                w.HourlyRate,
+                w.WorkDate,
+                Total = w.HoursWorked * w.HourlyRate
+            }));
+        }
+
+
 
 
     }
