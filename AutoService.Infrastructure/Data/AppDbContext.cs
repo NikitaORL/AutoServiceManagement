@@ -25,6 +25,12 @@ namespace AutoService.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<RepairOrder>()
+                .HasOne<AppUser>()
+                .WithMany()
+                .HasForeignKey(r => r.AssignedMechanicUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Notification>()
                 .HasIndex(n => n.Key)
                 .IsUnique();

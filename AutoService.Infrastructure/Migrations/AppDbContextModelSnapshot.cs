@@ -219,6 +219,9 @@ namespace AutoService.Infrastructure.Migrations
 
             modelBuilder.Entity("AutoService.Core.Entities.RepairOrder", b =>
                 {
+                    b.Property<int?>("AssignedMechanicUserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
@@ -245,6 +248,8 @@ namespace AutoService.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CarId");
+
+                    b.HasIndex("AssignedMechanicUserId");
 
                     b.ToTable("RepairOrders");
                 });
@@ -346,6 +351,11 @@ namespace AutoService.Infrastructure.Migrations
 
             modelBuilder.Entity("AutoService.Core.Entities.RepairOrder", b =>
                 {
+                    b.HasOne("AutoService.Core.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedMechanicUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("AutoService.Core.Entities.Car", "Car")
                         .WithMany("RepairOrders")
                         .HasForeignKey("CarId")

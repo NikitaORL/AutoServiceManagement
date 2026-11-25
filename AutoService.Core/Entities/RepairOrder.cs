@@ -9,6 +9,8 @@ namespace AutoService.Core.Entities
 
         public int CarId { get; set; }
 
+        public int? AssignedMechanicUserId { get; set; }
+
         [JsonIgnore]
         public Car? Car { get; set; }
 

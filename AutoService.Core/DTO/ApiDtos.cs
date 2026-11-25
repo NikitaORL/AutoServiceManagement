@@ -55,8 +55,14 @@ namespace AutoService.Core.DTO
         public string Status { get; set; } = "Pending";
     }
 
+    public class AssignMechanicRequest
+    {
+        [Range(1, int.MaxValue)]
+        public int MechanicUserId { get; set; }
+    }
+
     public record RepairOrderResponse(
-        int Id, int CarId, string Description, string Status, DateTime CreatedAt, DateTime? CompletedAt);
+        int Id, int CarId, string Description, string Status, DateTime CreatedAt, DateTime? CompletedAt, int? AssignedMechanicUserId = null);
 
     public class PartRequest
     {
