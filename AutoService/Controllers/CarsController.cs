@@ -18,11 +18,35 @@ namespace AutoService.Controllers
 
         // GET: api/cars
         [HttpGet]
-        public async Task<ActionResult<List<Car>>> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? search = null,
+            [FromQuery] string sort = "brand",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
         {
-            var cars = await _carService.GetAllAsync();
+            if (page < 1 || pageSize < 1 || pageSize > 100)
+                return BadRequest(new { message = "Page must be positive and pageSize must be 1-100" });
 
-            return Ok(cars);
+            if (sort != "brand" && sort != "year" && sort != "id")
+                return BadRequest(new { message = "Unsupported sort field" });
+
+            var cars = await _carService.GetAllAsync();
+            var query = cars.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(c => c.Brand.Contains(search, StringComparison.OrdinalIgnoreCase) || c.Model.Contains(search, StringComparison.OrdinalIgnoreCase) || c.LicensePlate.Contains(search, StringComparison.OrdinalIgnoreCase));
+
+            query = sort switch
+            {
+                "brand" => query.OrderBy(c => c.Brand).ThenBy(x => x.Id),
+                "year" => query.OrderBy(c => c.Year).ThenBy(x => x.Id),
+                _ => query.OrderBy(x => x.Id)
+            };
+
+            int total = query.Count();
+            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/cars/1
