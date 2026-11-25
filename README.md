@@ -54,10 +54,11 @@ Using the admin JWT, call `POST /api/auth/staff` to create a user with role `Ser
 dotnet user-secrets set "Worker:Email" "worker@example.test" --project AutoService.Worker/AutoService.Worker.csproj
 dotnet user-secrets set "Worker:Password" "REPLACE_WITH_WORKER_PASSWORD" --project AutoService.Worker/AutoService.Worker.csproj
 dotnet user-secrets set "Api:BaseUrl" "https://localhost:7146" --project AutoService.Worker/AutoService.Worker.csproj
+$env:DOTNET_ENVIRONMENT = "Development"
 dotnet run --project AutoService.Worker/AutoService.Worker.csproj
 ```
 
-The Worker logs in as `Service`, checks completed repair orders every 15 minutes, and checks due maintenance once a day. Notifications are stored in the database with unique keys so retries do not create duplicates. Customers read messages at `GET /api/me/notifications`. The Worker rejects non-local HTTP endpoints; use HTTPS for any remote API.
+Set `DOTNET_ENVIRONMENT=Development` when loading Worker user secrets. The Worker logs in as `Service`, checks completed repair orders every 15 minutes, and checks due maintenance once a day. Notifications are stored in the database with unique keys so retries do not create duplicates. Customers read messages at `GET /api/me/notifications`. The Worker rejects non-local HTTP endpoints; use HTTPS for any remote API.
 
 ## Permissions
 
