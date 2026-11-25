@@ -1,3 +1,4 @@
+using AutoService.Core.DTO;
 using Microsoft.AspNetCore.Authorization;
 ﻿
 using AutoService.Core.Entities;
@@ -48,7 +49,7 @@ namespace AutoService.Controllers
             int total = query.Count();
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
+            return Ok(new { items = items.Select(c => new CustomerResponse(c.Id, c.FirstName, c.LastName, c.Email, c.PhoneNumber)), total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/customers/1
@@ -60,14 +61,15 @@ namespace AutoService.Controllers
             if (customer == null)
                 return NotFound();
 
-            return Ok(customer);
+            return Ok(new CustomerResponse(customer.Id, customer.FirstName, customer.LastName, customer.Email, customer.PhoneNumber));
         }
 
         // POST: api/customers
         [HttpPost]
         public async Task<ActionResult<Customer>> Create(
-            [FromBody] Customer customer)
+            [FromBody] CustomerRequest request)
         {
+            var customer = new Customer { FirstName = request.FirstName, LastName = request.LastName, Email = request.Email, PhoneNumber = request.PhoneNumber };
             try
             {
                 var createdCustomer =
@@ -76,7 +78,7 @@ namespace AutoService.Controllers
                 return CreatedAtAction(
                     nameof(GetById),
                     new { id = createdCustomer.Id },
-                    createdCustomer);
+                    new CustomerResponse(createdCustomer.Id, createdCustomer.FirstName, createdCustomer.LastName, createdCustomer.Email, createdCustomer.PhoneNumber));
             }
             catch (ArgumentException ex)
             {
@@ -88,8 +90,9 @@ namespace AutoService.Controllers
         // PUT: api/customers/1
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(
-            int id, [FromBody] Customer customer)
+            int id, [FromBody] CustomerRequest request)
         {
+            var customer = new Customer { FirstName = request.FirstName, LastName = request.LastName, Email = request.Email, PhoneNumber = request.PhoneNumber };
             try
             {
                 var updated = await _customerService.UpdateAsync(id, customer);
