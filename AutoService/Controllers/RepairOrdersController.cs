@@ -14,15 +14,18 @@ namespace AutoService.Controllers
         private readonly IRepairOrderService _service;
         private readonly IRepairOrderPartService _partService;
         private readonly IWorkLogService _workLogService;
+        private readonly IInvoiceService _invoiceService;
 
         public RepairOrdersController(
             IRepairOrderService service,
             IRepairOrderPartService partService,
-            IWorkLogService workLogService)
+            IWorkLogService workLogService,
+            IInvoiceService invoiceService)
         {
             _service = service;
             _partService = partService;
             _workLogService = workLogService;
+            _invoiceService = invoiceService;
         }
 
 
@@ -243,6 +246,18 @@ namespace AutoService.Controllers
 
 
 
+
+        // GET: api/repair-orders/1/invoice
+        [HttpGet("{id:int}/invoice")]
+        public async Task<IActionResult> GetInvoice(int id)
+        {
+            var invoice = await _invoiceService.GetInvoiceAsync(id);
+
+            if (invoice == null)
+                return NotFound();
+
+            return Ok(invoice);
+        }
 
     }
 }
