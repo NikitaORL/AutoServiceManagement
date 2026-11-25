@@ -1,3 +1,4 @@
+using AutoService.Core.DTO;
 using Microsoft.AspNetCore.Authorization;
 ﻿
 using AutoService.Core.Entities;
@@ -48,7 +49,7 @@ namespace AutoService.Controllers
             int total = query.Count();
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
+            return Ok(new { items = items.Select(c => new CarResponse(c.Id, c.Brand, c.Model, c.Year, c.LicensePlate, c.CustomerId)), total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/cars/1
@@ -60,7 +61,7 @@ namespace AutoService.Controllers
             if (car == null)
                 return NotFound();
 
-            return Ok(car);
+            return Ok(new CarResponse(car.Id, car.Brand, car.Model, car.Year, car.LicensePlate, car.CustomerId));
         }
 
         // GET: api/cars/customer/1
@@ -70,15 +71,16 @@ namespace AutoService.Controllers
         {
             var cars = await _carService.GetByCustomerIdAsync(customerId);
 
-            return Ok(cars);
+            return Ok(cars.Select(c => new CarResponse(c.Id, c.Brand, c.Model, c.Year, c.LicensePlate, c.CustomerId)));
         }
 
         // POST: api/cars
         [Authorize(Roles = "Admin,Service")]
         [HttpPost]
         public async Task<ActionResult<Car>> Create(
-            [FromBody] Car car)
+            [FromBody] CarRequest request)
         {
+            var car = new Car { Brand = request.Brand, Model = request.Model, Year = request.Year, LicensePlate = request.LicensePlate, CustomerId = request.CustomerId };
             try
             {
                 var createdCar = await _carService.CreateAsync(car);
@@ -86,7 +88,7 @@ namespace AutoService.Controllers
                 return CreatedAtAction(
                     nameof(GetById),
                     new { id = createdCar.Id },
-                    createdCar);
+                    new CarResponse(createdCar.Id, createdCar.Brand, createdCar.Model, createdCar.Year, createdCar.LicensePlate, createdCar.CustomerId));
             }
             catch (ArgumentException ex)
             {
@@ -99,8 +101,9 @@ namespace AutoService.Controllers
         [Authorize(Roles = "Admin,Service")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(
-            int id, [FromBody] Car car)
+            int id, [FromBody] CarRequest request)
         {
+            var car = new Car { Brand = request.Brand, Model = request.Model, Year = request.Year, LicensePlate = request.LicensePlate, CustomerId = request.CustomerId };
             try
             {
                 var updated = await _carService.UpdateAsync(id, car);
