@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 ﻿
 using AutoService.Core.Entities;
@@ -205,10 +206,10 @@ namespace AutoService.Controllers
 
 
         // POST: api/repair-orders/1/worklogs
+        [Authorize(Roles = "Mechanic")]
         [HttpPost("{id:int}/worklogs")]
         public async Task<IActionResult> AddWorkLog(
             int id,
-            [FromQuery] string mechanicUserId,
             [FromQuery] string description,
             [FromQuery] decimal hoursWorked,
             [FromQuery] decimal hourlyRate)
@@ -216,7 +217,7 @@ namespace AutoService.Controllers
             var workLog = new WorkLog
             {
                 RepairOrderId = id,
-                MechanicUserId = mechanicUserId,
+                MechanicUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty,
                 Description = description,
                 HoursWorked = hoursWorked,
                 HourlyRate = hourlyRate
