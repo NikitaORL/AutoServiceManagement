@@ -1,3 +1,4 @@
+using AutoService.Core.DTO;
 using Microsoft.AspNetCore.Authorization;
 ﻿
 using AutoService.Core.Entities;
@@ -48,7 +49,7 @@ namespace AutoService.Controllers
             int total = query.Count();
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return Ok(new { items, total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
+            return Ok(new { items = items.Select(p => new PartResponse(p.Id, p.Name, p.PartNumber, p.Price, p.StockQuantity, p.Description)), total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/parts/1
@@ -60,7 +61,7 @@ namespace AutoService.Controllers
             if (part == null)
                 return NotFound();
 
-            return Ok(part);
+            return Ok(new PartResponse(part.Id, part.Name, part.PartNumber, part.Price, part.StockQuantity, part.Description));
         }
 
 
@@ -68,8 +69,9 @@ namespace AutoService.Controllers
         [Authorize(Roles = "Admin,Service")]
         [HttpPost]
         public async Task<ActionResult<Part>> Create(
-            [FromBody] Part part)
+            [FromBody] PartRequest request)
         {
+            var part = new Part { Name = request.Name, PartNumber = request.PartNumber, Price = request.Price, StockQuantity = request.StockQuantity, Description = request.Description };
             try
             {
                 var createdPart = await _service.CreateAsync(part);
@@ -77,7 +79,7 @@ namespace AutoService.Controllers
                 return CreatedAtAction(
                     nameof(GetById),
                     new { id = createdPart.Id },
-                    createdPart);
+                    new PartResponse(createdPart.Id, createdPart.Name, createdPart.PartNumber, createdPart.Price, createdPart.StockQuantity, createdPart.Description));
             }
             catch (ArgumentException ex)
             {
@@ -91,8 +93,9 @@ namespace AutoService.Controllers
         [Authorize(Roles = "Admin,Service")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(
-            int id, [FromBody] Part part)
+            int id, [FromBody] PartRequest request)
         {
+            var part = new Part { Name = request.Name, PartNumber = request.PartNumber, Price = request.Price, StockQuantity = request.StockQuantity, Description = request.Description };
             try
             {
                 var updated = await _service.UpdateAsync(id, part);
