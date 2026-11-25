@@ -17,11 +17,34 @@ namespace AutoService.Infrastructure.Data
         public DbSet<Part> Parts { get; set; }
         public DbSet<RepairOrderPart> RepairOrderParts { get; set; }
         public DbSet<WorkLog> WorkLogs { get; set; }
+        public DbSet<AppUser> Users { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AppUser>()
+                .HasIndex(u => u.NormalizedEmail)
+                .IsUnique();
+
+            modelBuilder.Entity<AppUser>()
+                .Property(u => u.NormalizedEmail)
+                .HasMaxLength(256);
+
+            modelBuilder.Entity<AppUser>()
+                .Property(u => u.Email)
+                .HasMaxLength(256);
+
+            modelBuilder.Entity<AppUser>()
+                .Property(u => u.Role)
+                .HasMaxLength(32);
+
+            modelBuilder.Entity<AppUser>()
+                .HasOne<Customer>()
+                .WithMany()
+                .HasForeignKey(u => u.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Part>()
                 .Property(p => p.Price)
