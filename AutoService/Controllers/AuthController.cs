@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -63,6 +64,7 @@ namespace AutoService.Controllers
         }
 
         [AllowAnonymous]
+        [EnableRateLimiting("auth")]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
@@ -107,6 +109,7 @@ namespace AutoService.Controllers
         }
 
         [AllowAnonymous]
+        [EnableRateLimiting("auth")]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
