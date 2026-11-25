@@ -35,7 +35,7 @@ namespace AutoService.Controllers
             var cars = await _db.Cars.AsNoTracking()
                 .Where(c => c.CustomerId == customerId)
                 .OrderBy(c => c.Id)
-                .Select(c => new { c.Id, c.Brand, c.Model, c.Year, c.LicensePlate })
+                .Select(c => new { c.Id, c.Brand, c.Model, c.Year, c.LicensePlate, c.NextServiceDate })
                 .ToListAsync();
 
             return Ok(cars);

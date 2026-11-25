@@ -81,6 +81,7 @@ namespace AutoService.Core.Services
             existingCar.Year = car.Year;
             existingCar.LicensePlate = car.LicensePlate;
             existingCar.CustomerId = car.CustomerId;
+            existingCar.NextServiceDate = car.NextServiceDate;
 
             await _carRepository.UpdateAsync(existingCar);
 

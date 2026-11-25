@@ -36,10 +36,12 @@ namespace AutoService.Core.DTO
 
         [Range(1, int.MaxValue)]
         public int CustomerId { get; set; }
+
+        public DateTime? NextServiceDate { get; set; }
     }
 
     public record CarResponse(
-        int Id, string Brand, string Model, int Year, string LicensePlate, int CustomerId);
+        int Id, string Brand, string Model, int Year, string LicensePlate, int CustomerId, DateTime? NextServiceDate = null);
 
     public class RepairOrderRequest
     {

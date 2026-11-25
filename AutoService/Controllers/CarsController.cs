@@ -49,7 +49,7 @@ namespace AutoService.Controllers
             int total = query.Count();
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return Ok(new { items = items.Select(c => new CarResponse(c.Id, c.Brand, c.Model, c.Year, c.LicensePlate, c.CustomerId)), total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
+            return Ok(new { items = items.Select(c => new CarResponse(c.Id, c.Brand, c.Model, c.Year, c.LicensePlate, c.CustomerId, c.NextServiceDate)), total, page, pageSize, totalPages = (int)Math.Ceiling(total / (double)pageSize) });
         }
 
         // GET: api/cars/1
@@ -61,7 +61,7 @@ namespace AutoService.Controllers
             if (car == null)
                 return NotFound();
 
-            return Ok(new CarResponse(car.Id, car.Brand, car.Model, car.Year, car.LicensePlate, car.CustomerId));
+            return Ok(new CarResponse(car.Id, car.Brand, car.Model, car.Year, car.LicensePlate, car.CustomerId, car.NextServiceDate));
         }
 
         // GET: api/cars/customer/1
@@ -71,7 +71,7 @@ namespace AutoService.Controllers
         {
             var cars = await _carService.GetByCustomerIdAsync(customerId);
 
-            return Ok(cars.Select(c => new CarResponse(c.Id, c.Brand, c.Model, c.Year, c.LicensePlate, c.CustomerId)));
+            return Ok(cars.Select(c => new CarResponse(c.Id, c.Brand, c.Model, c.Year, c.LicensePlate, c.CustomerId, c.NextServiceDate)));
         }
 
         // POST: api/cars
@@ -80,7 +80,7 @@ namespace AutoService.Controllers
         public async Task<ActionResult<Car>> Create(
             [FromBody] CarRequest request)
         {
-            var car = new Car { Brand = request.Brand, Model = request.Model, Year = request.Year, LicensePlate = request.LicensePlate, CustomerId = request.CustomerId };
+            var car = new Car { Brand = request.Brand, Model = request.Model, Year = request.Year, LicensePlate = request.LicensePlate, CustomerId = request.CustomerId, NextServiceDate = request.NextServiceDate };
             try
             {
                 var createdCar = await _carService.CreateAsync(car);
@@ -88,7 +88,7 @@ namespace AutoService.Controllers
                 return CreatedAtAction(
                     nameof(GetById),
                     new { id = createdCar.Id },
-                    new CarResponse(createdCar.Id, createdCar.Brand, createdCar.Model, createdCar.Year, createdCar.LicensePlate, createdCar.CustomerId));
+                    new CarResponse(createdCar.Id, createdCar.Brand, createdCar.Model, createdCar.Year, createdCar.LicensePlate, createdCar.CustomerId, createdCar.NextServiceDate));
             }
             catch (ArgumentException ex)
             {
@@ -103,7 +103,7 @@ namespace AutoService.Controllers
         public async Task<IActionResult> Update(
             int id, [FromBody] CarRequest request)
         {
-            var car = new Car { Brand = request.Brand, Model = request.Model, Year = request.Year, LicensePlate = request.LicensePlate, CustomerId = request.CustomerId };
+            var car = new Car { Brand = request.Brand, Model = request.Model, Year = request.Year, LicensePlate = request.LicensePlate, CustomerId = request.CustomerId, NextServiceDate = request.NextServiceDate };
             try
             {
                 var updated = await _carService.UpdateAsync(id, car);

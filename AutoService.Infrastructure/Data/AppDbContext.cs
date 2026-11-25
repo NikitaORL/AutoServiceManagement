@@ -18,11 +18,30 @@ namespace AutoService.Infrastructure.Data
         public DbSet<RepairOrderPart> RepairOrderParts { get; set; }
         public DbSet<WorkLog> WorkLogs { get; set; }
         public DbSet<AppUser> Users { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.Key)
+                .IsUnique();
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.Key)
+                .HasMaxLength(160);
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.Message)
+                .HasMaxLength(1000);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne<Customer>()
+                .WithMany()
+                .HasForeignKey(n => n.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AppUser>()
                 .HasIndex(u => u.NormalizedEmail)

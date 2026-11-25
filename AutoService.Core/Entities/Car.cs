@@ -17,6 +17,8 @@ namespace AutoService.Core.Entities
 
         public int CustomerId { get; set; }
 
+        public DateTime? NextServiceDate { get; set; }
+
         [JsonIgnore]
         public Customer? Customer { get; set; }
 
