@@ -1,0 +1,56 @@
+@model AutoService.MVC.Models.RepairWorkViewModel
+@{
+    ViewData["Title"] = "Repair Work";
+    bool isMechanic = Context.Session.GetString("Role") == "Mechanic";
+}
+<div class="container mt-4" style="max-width:650px">
+    <h2>Repair #@Model.RepairOrderId</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (isMechanic)
+    {
+        <div class="card p-3 mb-3">
+            <h4>Record work hours</h4>
+            <form asp-action="AddHours" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="RepairOrderId" type="hidden" />
+                <div class="mb-3">
+                    <label asp-for="Description"></label>
+                    <input asp-for="Description" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="HoursWorked">Hours worked</label>
+                    <input asp-for="HoursWorked" type="number" step="0.25" min="0.25"
+                           class="form-control" />
+                </div>
+                <button class="btn btn-primary">Save Hours</button>
+            </form>
+        </div>
+    }
+
+    <div class="card p-3 mb-3">
+        <h4>Add spare part</h4>
+        <form asp-action="AddPart" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="RepairOrderId" type="hidden" />
+            <div class="mb-3">
+                <label asp-for="PartId">Spare part ID</label>
+                <input asp-for="PartId" type="number" min="1" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Quantity"></label>
+                <input asp-for="Quantity" type="number" min="1" class="form-control" />
+            </div>
+            <button class="btn btn-primary">Add Part</button>
+        </form>
+    </div>
+    <a asp-controller="RepairOrders" asp-action="Index" class="btn btn-secondary">Back</a>
+</div>

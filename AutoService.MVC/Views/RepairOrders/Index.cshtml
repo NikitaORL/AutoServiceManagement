@@ -41,6 +41,7 @@
                 <td>@order.Status</td>
                 <td>@order.AssignedMechanicUserId</td>
                 <td>
+                    <a asp-controller="RepairWork" asp-action="Index" asp-route-id="@order.Id" class="btn btn-outline-secondary btn-sm mb-2">Work / Parts</a>
                     <form asp-action="ChangeStatus" method="post" class="mb-2">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@order.Id" />
