@@ -1,0 +1,74 @@
+﻿@{
+    var role = ViewBag.Role as string ?? "";
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container mt-5">
+
+    <h2>AutoService Dashboard</h2>
+    <p>Welcome! Your role: <b>@role</b></p>
+
+    <hr />
+
+    @if (role == "Admin")
+    {
+        <h3>Admin Panel</h3>
+
+        <div class="card p-3 mb-3">
+            <h5>Customers</h5>
+            <p>Manage customers</p>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <h5>Cars</h5>
+            <p>Manage vehicles</p>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <h5>Repair Orders</h5>
+            <p>Manage repairs and mechanics</p>
+        </div>
+    }
+
+    @if (role == "Mechanic")
+    {
+        <h3>Mechanic Panel</h3>
+
+        <div class="card p-3 mb-3">
+            <h5>My Repair Orders</h5>
+            <p>View assigned repairs</p>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <h5>Work Logs</h5>
+            <p>Record working hours</p>
+        </div>
+    }
+
+    @if (role == "Customer")
+    {
+        <h3>Customer Panel</h3>
+
+        <div class="card p-3 mb-3">
+            <h5>My Cars</h5>
+            <p>View your vehicles</p>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <h5>Repair History</h5>
+            <p>Track repairs and invoices</p>
+        </div>
+    }
+
+    <form asp-controller="Account"
+          asp-action="Logout"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <button type="submit" class="btn btn-danger">
+            Logout
+        </button>
+    </form>
+
+</div>
