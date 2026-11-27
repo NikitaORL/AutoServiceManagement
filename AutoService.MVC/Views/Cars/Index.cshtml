@@ -1,0 +1,74 @@
+@model AutoService.MVC.Models.CarPageViewModel
+@{
+    ViewData["Title"] = "Cars";
+}
+<div class="container mt-4">
+    <h2>Cars</h2>
+    <a asp-action="Create" class="btn btn-success mb-3">+ Add Car</a>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <form asp-action="Index" method="get" class="mb-3">
+        <input name="search" value="@Model.Search" class="form-control mb-2"
+               placeholder="Brand, model or license plate" />
+        <button class="btn btn-primary">Search</button>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Car</th>
+                <th>Year</th>
+                <th>Plate</th>
+                <th>Owner ID</th>
+                <th>Next service</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var car in Model.Items)
+        {
+            <tr>
+                <td>@car.Id</td>
+                <td>@car.Brand @car.Model</td>
+                <td>@car.Year</td>
+                <td>@car.LicensePlate</td>
+                <td>@car.CustomerId</td>
+                <td>@car.NextServiceDate?.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@car.Id"
+                       class="btn btn-warning btn-sm">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@car.Id" method="post"
+                          class="d-inline" onsubmit="return confirm('Delete car?')">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @if (!Model.Items.Any())
+    {
+        <p>No cars found.</p>
+    }
+
+    @if (Model.Page > 1)
+    {
+        <a asp-action="Index" asp-route-page="@(Model.Page - 1)"
+           asp-route-search="@Model.Search" class="btn btn-outline-primary">Previous</a>
+    }
+    @if (Model.Page < Model.TotalPages)
+    {
+        <a asp-action="Index" asp-route-page="@(Model.Page + 1)"
+           asp-route-search="@Model.Search" class="btn btn-outline-primary">Next</a>
+    }
+
+    <a asp-controller="Dashboard" asp-action="Admin"
+       class="btn btn-secondary">Back</a>
+</div>

@@ -1,0 +1,42 @@
+@model AutoService.MVC.Models.CarViewModel
+@{
+    bool editing = Model.Id > 0;
+    ViewData["Title"] = editing ? "Edit Car" : "Add Car";
+}
+<div class="container mt-4" style="max-width:550px">
+    <h2>@ViewData["Title"]</h2>
+    <form asp-controller="Cars" asp-action="@(editing ? "Edit" : "Create")" method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Brand"></label>
+            <input asp-for="Brand" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Model"></label>
+            <input asp-for="Model" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Year"></label>
+            <input asp-for="Year" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="LicensePlate">License plate</label>
+            <input asp-for="LicensePlate" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="CustomerId">Owner (email)</label>
+            <select asp-for="CustomerId" asp-items="ViewBag.Customers" class="form-select">
+                <option value="0">Select owner</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label asp-for="NextServiceDate">Next service</label>
+            <input asp-for="NextServiceDate" type="date" class="form-control" />
+        </div>
+        <button class="btn btn-success">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
