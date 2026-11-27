@@ -3,5 +3,6 @@
   <Project Path="AutoService.Infrastructure/AutoService.Infrastructure.csproj" Id="89e583c4-2354-46a0-bc10-0b73e81b61a9" />
   <Project Path="AutoService/AutoService.csproj" Id="83da74fe-9714-48d6-9e25-9f794bf81754" />
   <Project Path="AutoService.Worker/AutoService.Worker.csproj" />
+  <Project Path="AutoService.MVC/AutoService.MVC.csproj" Id="07d34291-fece-4593-8e7f-52c1e7c5e6fe" />
   <Project Path="AutoService.Tests/AutoService.Tests.csproj" />
 </Solution>
