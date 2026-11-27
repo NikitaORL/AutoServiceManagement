@@ -1,0 +1,15 @@
+@model AutoService.MVC.Models.MyInvoiceViewModel
+@{
+    ViewData["Title"] = "Invoice";
+}
+<div class="container mt-4" style="max-width:650px">
+    <h2>Invoice for Repair #@Model.RepairOrderId</h2>
+    <table class="table table-bordered mt-3">
+        <tr><th>Spare parts</th><td>@Model.PartsSubtotal.ToString("0.00") €</td></tr>
+        <tr><th>Labor</th><td>@Model.LaborSubtotal.ToString("0.00") €</td></tr>
+        <tr><th>Subtotal</th><td>@Model.Subtotal.ToString("0.00") €</td></tr>
+        <tr><th>VAT (@((Model.VatRate * 100).ToString("0"))%)</th><td>@Model.VatAmount.ToString("0.00") €</td></tr>
+        <tr class="table-success"><th>Total</th><td><strong>@Model.Total.ToString("0.00") €</strong></td></tr>
+    </table>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</div>
