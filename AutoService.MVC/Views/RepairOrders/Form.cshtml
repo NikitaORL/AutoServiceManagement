@@ -1,0 +1,35 @@
+@model AutoService.MVC.Models.RepairOrderViewModel
+@{
+    bool editing = Model.Id > 0;
+    ViewData["Title"] = editing ? "Edit Repair Order" : "Add Repair Order";
+}
+<div class="container mt-4" style="max-width:550px">
+    <h2>@ViewData["Title"]</h2>
+    <form asp-action="@(editing ? "Edit" : "Create")" method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="CarId">Car ID</label>
+            <input asp-for="CarId" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+        @if (editing)
+        {
+            <div class="mb-3">
+                <label asp-for="Status"></label>
+                <select asp-for="Status" class="form-select">
+                    <option value="Pending">Pending</option>
+                    <option value="InProgress">In progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+        }
+        <button class="btn btn-success">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
