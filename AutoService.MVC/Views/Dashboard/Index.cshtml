@@ -28,6 +28,12 @@
             <h5>Repair Orders</h5>
             <p>Manage repairs and mechanics</p>
         </div>
+
+        <a asp-controller="Customers"
+               asp-action="Index"
+               class="btn btn-primary">
+            Manage Customers
+        </a>
     }
 
     @if (role == "Mechanic")
